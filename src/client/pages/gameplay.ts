@@ -2,6 +2,7 @@ import { client } from "../utils/networking";
 import { Room } from "colyseus.js";
 import { State } from "../../server/rooms/State";
 import { showHome } from "./home";
+import { getRGB, toHex } from "../utils/color";
 
 let room: Room<State>;
 
@@ -45,7 +46,12 @@ export async function showGameplay(roomName: string) {
   peopleEl.innerHTML = "";
   gameplay.querySelector('.mode').innerHTML = `${roomName} session`;
 
+  clearCanvas(ctx);
+  clearCanvas(prevCtx);
+
+  gameplay.classList.add('loading');
   room = await client.joinOrCreate(roomName);
+  room.onStateChange.once(() => gameplay.classList.remove('loading'));
 
   room.state.players.onAdd = (player, sessionId) => {
     const playerEl = document.createElement("li");
@@ -73,7 +79,7 @@ export async function showGameplay(roomName: string) {
   };
 
   room.state.paths.onAdd = function(path, index) {
-    drawPath(ctx, path.points, false);
+    drawPath(ctx, path.color, path.points, false);
   }
 
   room.onMessage((message) => {
@@ -85,85 +91,89 @@ export async function showGameplay(roomName: string) {
       chatEl.scrollTop = chatEl.scrollHeight;
     }
   });
-
-  setupListeners();
 }
 
 export function hideGameplay() {
   gameplay.classList.add('hidden');
 }
 
-function setupListeners() {
-
-  ctx.lineWidth = 1;
-  ctx.lineJoin = ctx.lineCap = 'round';
-
-  var isDrawing, points = [ ];
-
-  canvas.addEventListener("mousedown", (e) => {
-    if (room.state.countdown === 0) { return; }
-
-    const point = [e.offsetX, e.offsetY];
-    room.send(['s', point]);
-
-    clearPreviewCanvas();
-
-    isDrawing = true;
-    points = [];
-    points.push(...point);
-  });
-
-  canvas.addEventListener("mousemove", (e) => {
-    if (room.state.countdown === 0) { return; }
-
-    if (!isDrawing) return;
-
-    const point = [e.offsetX, e.offsetY];
-    room.send(['p', point]);
-
-    points.push(...point);
-
-    drawPath(prevCtx, points, true);
-
-    // ctx.beginPath();
-    // ctx.moveTo(points[points.length - 2].x, points[points.length - 2].y);
-    // ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
-    // ctx.stroke();
-
-    // for (var i = 0, len = points.length; i < len; i++) {
-    //   const dx = points[i].x - points[points.length - 1].x;
-    //   const dy = points[i].y - points[points.length - 1].y;
-    //   const d = dx * dx + dy * dy;
-
-    //   if (d < 1000) {
-    //     ctx.beginPath();
-    //     ctx.strokeStyle = 'rgba(0,0,0,0.3)';
-    //     ctx.moveTo(points[points.length - 1].x + (dx * 0.2), points[points.length - 1].y + (dy * 0.2));
-    //     ctx.lineTo(points[i].x - (dx * 0.2), points[i].y - (dy * 0.2));
-    //     ctx.stroke();
-    //   }
-    // }
-  });
-
-  canvas.addEventListener("mouseup", (e) => {
-    room.send(['e']);
-
-    isDrawing = false;
-    points.length = 0;
-
-    clearPreviewCanvas();
-  });
-
+function checkRoom() {
+  return (room && room.state.countdown > 0);
 }
+
+ctx.lineWidth = 1;
+ctx.lineJoin = ctx.lineCap = 'round';
+
+var isDrawing, color = 0x000000, points = [ ];
+
+prevCanvas.addEventListener("mousedown", (e) => startPath(e.offsetX, e.offsetY));
+prevCanvas.addEventListener("mousemove", (e) => movePath(e.offsetX, e.offsetY));
+prevCanvas.addEventListener("mouseup", (e) => endPath());
+
+prevCanvas.addEventListener("touchstart", (e) => {
+  var rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+  var bodyRect = document.body.getBoundingClientRect();
+  var x = e.touches[0].pageX - (rect.left - bodyRect.left);
+  var y = e.touches[0].pageY - (rect.top - bodyRect.top);
+  return startPath(x, y);
+});
+prevCanvas.addEventListener("touchmove", (e) => {
+  var rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+  var bodyRect = document.body.getBoundingClientRect();
+  var x = e.touches[0].pageX - (rect.left - bodyRect.left);
+  var y = e.touches[0].pageY - (rect.top - bodyRect.top);
+  movePath(x, y)
+});
+prevCanvas.addEventListener("touchend", (e) => endPath());
+
+gameplay.querySelector('.colorpicker').addEventListener("change", (e) => {
+  color = parseInt("0x" + (e.target as HTMLInputElement).value);
+});
 
 function useBrush() {
 }
 
-function clearPreviewCanvas() {
-  prevCtx.clearRect(0, 0, prevCanvas.width, prevCanvas.height);
+function startPath(x, y) {
+  if (!checkRoom()) { return; }
+
+  const point = [x, y];
+  room.send(['s', point, color]);
+
+  clearCanvas(prevCtx);
+
+  isDrawing = true;
+  points = [];
+  points.push(...point);
 }
 
-function drawPath(ctx: CanvasRenderingContext2D, points: number[], isPreview: boolean = false) {
+function movePath(x, y) {
+  if (!checkRoom()) { return; }
+  if (!isDrawing) { return; }
+
+  const point = [x, y];
+  room.send(['p', point]);
+
+  points.push(...point);
+  drawPath(prevCtx, color, points, true);
+}
+
+function endPath() {
+  room.send(['e']);
+
+  isDrawing = false;
+  points.length = 0;
+
+  clearCanvas(prevCtx);
+}
+
+function clearCanvas(ctx) {
+  ctx.clearRect(0, 0, prevCanvas.width, prevCanvas.height);
+}
+
+async function drawPath(ctx: CanvasRenderingContext2D, color: number, points: number[], isPreview: boolean = false) {
+  const rgb = getRGB(color);
+  ctx.strokeStyle = toHex(color);
+
   for (let i = (isPreview) ? points.length - 4 : 2; i < points.length; i += 2) {
     const moveToX = points[i-2];
     const moveToY = points[i-1];
@@ -176,6 +186,8 @@ function drawPath(ctx: CanvasRenderingContext2D, points: number[], isPreview: bo
     ctx.lineTo(currentX, currentY);
     ctx.stroke();
 
+    // await new Promise(resolve => setTimeout(resolve, 1));
+
     for (var j = 0, len = points.length; j < len; j+=2) {
       const previousX = points[j];
       const previousY = points[j+1];
@@ -186,7 +198,7 @@ function drawPath(ctx: CanvasRenderingContext2D, points: number[], isPreview: bo
 
       if (d < 1000) {
         ctx.beginPath();
-        ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+        ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.3)`;
         ctx.moveTo(currentX + (dx * 0.2), currentY + (dy * 0.2));
         ctx.lineTo(previousX - (dx * 0.2), previousY - (dy * 0.2));
         ctx.stroke();

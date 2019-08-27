@@ -41,6 +41,7 @@ export class DrawingRoom extends Room<State> {
         // start path
         player.lastPath = new Path();
         player.lastPath.points.push(...data);
+        player.lastPath.color = message[2];
 
       } else if (command === "p") {
         // path point

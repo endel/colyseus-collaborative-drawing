@@ -4,6 +4,7 @@ html, body {
   overflow: hidden;
   font-family: 'Varela Round', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 22px;
+  background: #f0f0f0;
 }
 
 #app {
@@ -21,16 +22,29 @@ ul {
   list-style: none;
 }
 
+h1, h2, h3 {
+  margin-top: 1em;
+  margin-bottom: 0.2em;
+}
+
 .hidden {
   display: none !important;
+}
+
+#home {
+  text-align: center;
+}
+
+#home ul li {
+  display: inline-block;
 }
 
 #gameplay {
   display: flex;
 }
 
-#gameplay .drawing-area {
-  position: relative;
+#gameplay:not(.loading) .spinner {
+  display: none;
 }
 
 #gameplay section.sidebar {
@@ -97,13 +111,51 @@ ul {
   padding: 0.6em;
 }
 
+#gameplay .drawing-area {
+  position: relative;
+  width: 800px;
+  height: 690px;
+}
+
+#gameplay .drawing-area .ad {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 728px;
+  height: 90px;
+  border: 1px solid;
+}
+
 #drawing {
   position: absolute;
   left: 0;
-  top: 0;
+  top: 42px;
+  background: #fff;
 }
 #drawing-preview {
   position: absolute;
   left: 0;
-  top: 0;
+  top: 42px;
 }
+
+/* loading spinner! */
+.spinner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 90px;
+  z-index: 1;
+  margin: auto;
+  display: inline-block;
+  width: 64px;
+  height: 64px;
+}
+.spinner div { position: absolute; top: 27px; width: 11px; height: 11px; border-radius: 50%; background: #000; animation-timing-function: cubic-bezier(0, 1, 1, 0); }
+.spinner div:nth-child(1) { left: 6px; animation: spinner1 0.6s infinite; }
+.spinner div:nth-child(2) { left: 6px; animation: spinner2 0.6s infinite; }
+.spinner div:nth-child(3) { left: 26px; animation: spinner2 0.6s infinite; }
+.spinner div:nth-child(4) { left: 45px; animation: spinner3 0.6s infinite; }
+@keyframes spinner1 { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+@keyframes spinner3 { 0% { transform: scale(1); } 100% { transform: scale(0); } }
+@keyframes spinner2 { 0% { transform: translate(0, 0); } 100% { transform: translate(19px, 0); } }

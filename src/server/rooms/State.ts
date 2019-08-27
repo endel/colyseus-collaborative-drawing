@@ -4,6 +4,7 @@ import { Player } from "./Player";
 
 export class Path extends Schema {
   @type("uint8") brush = 0;
+  @type("number") color: number;
   @type("number") userId: number;
   @type(["number"]) points = new ArraySchema<number>();
 }

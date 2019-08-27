@@ -18,10 +18,10 @@
 
         <h3>Drawing sessions</h3>
         <ul>
-          <li><a href="#" data-room="2minutes">2 minutes</a></li>
-          <li><a href="#" data-room="5minutes">5 minutes</a></li>
-          <li><a href="#" data-room="1hour">1 hour</a></li>
-          <li><a href="#" data-room="1day">1 day</a></li>
+          <li><a href="#" data-room="2minutes">2 minutes</a> |</li>
+          <li><a href="#" data-room="5minutes">5 minutes</a> |</li>
+          <li><a href="#" data-room="1hour">1 hour</a> |</li>
+          <li><a href="#" data-room="1day">1 day</a> |</li>
           <li><a href="#" data-room="1week">1 week</a></li>
         </ul>
       </div>
@@ -46,9 +46,24 @@
         </section>
 
         <section class="drawing-area">
+          <div class="spinner"><div></div><div></div><div></div><div></div></div>
 
-          <canvas id="drawing-preview" width="1024" height="768"></canvas>
-          <canvas id="drawing" width="1024" height="768"></canvas>
+          <div class="tools">
+            <label for="brush_sketch">Sketch</label>
+            <input type="radio" id="brush_sketch" name="brush" />
+
+            <label for="brush_sketch">Pen</label>
+            <input type="radio" id="brush_sketch" name="brush" />
+
+            <label for="brush_sketch">Marker</label>
+            <input type="radio" id="brush_sketch" name="brush" />
+
+            <input class="jscolor colorpicker" value="#000000" />
+          </div>
+
+          <canvas id="drawing" width="800" height="600"></canvas>
+          <canvas id="drawing-preview" width="800" height="600"></canvas>
+          <div class="ad">Banner</div>
         </section>
 
       </div>
