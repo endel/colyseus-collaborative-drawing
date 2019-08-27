@@ -1,8 +1,9 @@
 import { client } from "../utils/networking";
 import { Room } from "colyseus.js";
-import { State } from "../../server/rooms/State";
+import { State, DEFAULT_BRUSH, BRUSH } from "../../server/rooms/State";
 import { showHome } from "./home";
 import { getRGB, toHex } from "../utils/color";
+import brushFunctions from "../brushes";
 
 let room: Room<State>;
 
@@ -79,7 +80,7 @@ export async function showGameplay(roomName: string) {
   };
 
   room.state.paths.onAdd = function(path, index) {
-    drawPath(ctx, path.color, path.points, false);
+    brushFunctions[path.brush](ctx, path.color, path.points, false);
   }
 
   room.onMessage((message) => {
@@ -104,7 +105,7 @@ function checkRoom() {
 ctx.lineWidth = 1;
 ctx.lineJoin = ctx.lineCap = 'round';
 
-var isDrawing, color = 0x000000, points = [ ];
+var isDrawing, color = 0x000000, brush = DEFAULT_BRUSH, points = [ ];
 
 prevCanvas.addEventListener("mousedown", (e) => startPath(e.offsetX, e.offsetY));
 prevCanvas.addEventListener("mousemove", (e) => movePath(e.offsetX, e.offsetY));
@@ -126,18 +127,27 @@ prevCanvas.addEventListener("touchmove", (e) => {
 });
 prevCanvas.addEventListener("touchend", (e) => endPath());
 
+/**
+ * Tools: colorpicker
+ */
 gameplay.querySelector('.colorpicker').addEventListener("change", (e) => {
   color = parseInt("0x" + (e.target as HTMLInputElement).value);
 });
 
-function useBrush() {
-}
+/**
+ * Tools: brush
+ */
+Array.from(document.querySelectorAll('input[type=radio][name="brush"]')).forEach(radioButton => {
+  radioButton.addEventListener('change', (e) => {
+    brush = (e.target as HTMLInputElement).value as BRUSH;
+  });
+});
 
 function startPath(x, y) {
   if (!checkRoom()) { return; }
 
   const point = [x, y];
-  room.send(['s', point, color]);
+  room.send(['s', point, color, brush]);
 
   clearCanvas(prevCtx);
 
@@ -154,7 +164,7 @@ function movePath(x, y) {
   room.send(['p', point]);
 
   points.push(...point);
-  drawPath(prevCtx, color, points, true);
+  brushFunctions[brush](prevCtx, color, points, true);
 }
 
 function endPath() {
@@ -168,43 +178,6 @@ function endPath() {
 
 function clearCanvas(ctx) {
   ctx.clearRect(0, 0, prevCanvas.width, prevCanvas.height);
-}
-
-async function drawPath(ctx: CanvasRenderingContext2D, color: number, points: number[], isPreview: boolean = false) {
-  const rgb = getRGB(color);
-  ctx.strokeStyle = toHex(color);
-
-  for (let i = (isPreview) ? points.length - 4 : 2; i < points.length; i += 2) {
-    const moveToX = points[i-2];
-    const moveToY = points[i-1];
-
-    const currentX = points[i];
-    const currentY = points[i+1];
-
-    ctx.beginPath();
-    ctx.moveTo(moveToX, moveToY);
-    ctx.lineTo(currentX, currentY);
-    ctx.stroke();
-
-    // await new Promise(resolve => setTimeout(resolve, 1));
-
-    for (var j = 0, len = points.length; j < len; j+=2) {
-      const previousX = points[j];
-      const previousY = points[j+1];
-
-      const dx = previousX - currentX;
-      const dy = previousY - currentY;
-      const d = dx * dx + dy * dy;
-
-      if (d < 1000) {
-        ctx.beginPath();
-        ctx.strokeStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},0.3)`;
-        ctx.moveTo(currentX + (dx * 0.2), currentY + (dy * 0.2));
-        ctx.lineTo(previousX - (dx * 0.2), previousY - (dy * 0.2));
-        ctx.stroke();
-      }
-    }
-  }
 }
 
 function millisecondsToStr(_seconds) {

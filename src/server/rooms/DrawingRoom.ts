@@ -1,5 +1,5 @@
 import { Room, Client } from "colyseus";
-import { State, Path } from "./State";
+import { State, Path, BRUSH, DEFAULT_BRUSH } from "./State";
 import { Player } from "./Player";
 import { generateName } from "../utils/name_generator";
 
@@ -42,6 +42,7 @@ export class DrawingRoom extends Room<State> {
         player.lastPath = new Path();
         player.lastPath.points.push(...data);
         player.lastPath.color = message[2];
+        player.lastPath.brush = message[3] || DEFAULT_BRUSH;
 
       } else if (command === "p") {
         // path point

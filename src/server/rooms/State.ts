@@ -1,9 +1,16 @@
 import { Schema, type, MapSchema, ArraySchema } from "@colyseus/schema";
-
 import { Player } from "./Player";
 
+export enum BRUSH {
+  SKETCH = 's',
+  MARKER = 'm',
+  PEN = 'p',
+}
+
+export const DEFAULT_BRUSH = BRUSH.SKETCH;
+
 export class Path extends Schema {
-  @type("uint8") brush = 0;
+  @type("string") brush;
   @type("number") color: number;
   @type("number") userId: number;
   @type(["number"]) points = new ArraySchema<number>();
