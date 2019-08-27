@@ -126,16 +126,28 @@ h1, h2, h3 {
   border: 1px solid;
 }
 
+.tools {
+  padding: 4px;
+}
+.tools label {
+  border-radius: 4px;
+  padding: 4px 8px;
+  background: #c2c2c2;
+}
+
+.tools input[type=radio] { display: none; }
+.tools input[type=radio]:checked + label { background: #00ff0f; }
+
 #drawing {
   position: absolute;
   left: 0;
-  top: 42px;
+  top: 46px;
   background: #fff;
 }
 #drawing-preview {
   position: absolute;
   left: 0;
-  top: 42px;
+  top: 46px;
 }
 
 /* loading spinner! */

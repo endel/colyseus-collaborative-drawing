@@ -5,6 +5,7 @@ export enum BRUSH {
   SKETCH = 's',
   MARKER = 'm',
   PEN = 'p',
+  ROUNDED = 'r',
 }
 
 export const DEFAULT_BRUSH = BRUSH.SKETCH;

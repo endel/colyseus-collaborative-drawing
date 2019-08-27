@@ -1,6 +1,13 @@
 import { BRUSH } from "../../server/rooms/State";
 import { getRGB, toHex } from "../utils/color";
 
+function midPointBtw(p1x, p1y, p2x, p2y) {
+  return {
+    x: p1x + (p2x - p1x) / 2,
+    y: p1y + (p2y - p1y) / 2
+  };
+}
+
 export default {
   /**
    * "Sketch" brush: https://codepen.io/kangax/pen/EjivI
@@ -43,6 +50,9 @@ export default {
     }
   },
 
+  /**
+   * Pen: https://codepen.io/kangax/pen/aoxwb
+   */
   [BRUSH.PEN]: (ctx: CanvasRenderingContext2D, color: number, points: number[], isPreview: boolean = false) => {
     ctx.strokeStyle = toHex(color);
     ctx.lineJoin = ctx.lineCap = 'round';
@@ -65,7 +75,9 @@ export default {
     }
   },
 
-
+  /**
+   * Marker: https://codepen.io/kangax/pen/jLDAf
+   */
   [BRUSH.MARKER]: (ctx: CanvasRenderingContext2D, color: number, points: number[], isPreview: boolean = false) => {
     ctx.strokeStyle = toHex(color);
 
@@ -102,5 +114,40 @@ export default {
       ctx.lineTo(currentX + 4, currentY + 4);
       ctx.stroke();
     }
+  },
+
+  /**
+   * Rounded: https://codepen.io/kangax/pen/zofsp
+   */
+  [BRUSH.ROUNDED]: (ctx: CanvasRenderingContext2D, color: number, points: number[], isPreview: boolean = false) => {
+    ctx.strokeStyle = toHex(color);
+
+    ctx.lineWidth = 15;
+    ctx.lineJoin = ctx.lineCap = 'round';
+
+    let startIndex = (isPreview) ? points.length - 4 : 2;
+
+    let moveToX = points[startIndex - 2];
+    let moveToY = points[startIndex - 1];
+
+    ctx.beginPath();
+    ctx.moveTo(moveToX, moveToY);
+
+    let currentX;
+    let currentY;
+
+    for (let i = startIndex; i < points.length; i += 2) {
+      moveToX = points[i - 2];
+      moveToY = points[i - 1];
+
+      currentX = points[i];
+      currentY = points[i + 1];
+
+      var midPoint = midPointBtw(moveToX, moveToY, currentX, currentY);
+      ctx.quadraticCurveTo(moveToX, moveToY, midPoint.x, midPoint.y);
+    }
+
+    ctx.lineTo(currentX, currentY);
+    ctx.stroke();
   },
 }
