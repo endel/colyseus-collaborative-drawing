@@ -74,7 +74,7 @@ app.get('/drawings', async (req, res) => {
 });
 
 app.get('/drawings/:id', async (req, res) => {
-  res.json(await Drawing.findOne({ _id: req.param('id') }));
+  res.json(await Drawing.findOne({ _id: req.params.id }));
 });
 
 // add colyseus monitor
