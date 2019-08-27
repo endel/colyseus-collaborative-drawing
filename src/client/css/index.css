@@ -138,13 +138,13 @@ h1, h2, h3 {
 .tools input[type=radio] { display: none; }
 .tools input[type=radio]:checked + label { background: #00ff0f; }
 
-#drawing {
+#gameplay canvas.drawing {
   position: absolute;
   left: 0;
   top: 46px;
   background: #fff;
 }
-#drawing-preview {
+#gameplay canvas.drawing-preview {
   position: absolute;
   left: 0;
   top: 46px;

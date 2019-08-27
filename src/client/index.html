@@ -24,6 +24,9 @@
           <li><a href="#" data-room="1day">1 day</a> |</li>
           <li><a href="#" data-room="1week">1 week</a></li>
         </ul>
+
+        <h3>Previous sessions</h3>
+        <ul class="previous-sessions"></ul>
       </div>
 
       <div id="gameplay" class="hidden">
@@ -64,11 +67,15 @@
             <input class="jscolor colorpicker" value="#000000" />
           </div>
 
-          <canvas id="drawing" width="800" height="600"></canvas>
-          <canvas id="drawing-preview" width="800" height="600"></canvas>
+          <canvas class="drawing" width="800" height="600"></canvas>
+          <canvas class="drawing-preview" width="800" height="600"></canvas>
           <div class="ad">Banner</div>
         </section>
 
+      </div>
+
+      <div id="drawing" class="hidden">
+        <canvas width="800" height="600"></canvas>
       </div>
 
     </div>

@@ -1,3 +1,4 @@
+import { get } from "httpie";
 import { showGameplay } from "./gameplay";
 
 const home = document.getElementById('home');
@@ -14,9 +15,24 @@ Array.from(home.querySelectorAll('ul li a')).forEach((joinSessionLink) => {
   });
 });
 
-export function showHome() {
+export async function showHome() {
   home.classList.remove('hidden');
 
+  const previousSessionsEl = home.querySelector('.previous-sessions');
+  previousSessionsEl.innerHTML = "";
+
+  const drawings = (await get('/drawings')).data;
+  drawings.forEach(drawing => {
+    const drawingEl = document.createElement('li');
+    const drawingAnchorEl = document.createElement('a');
+    drawingAnchorEl.href = `#${drawing._id}`;
+    drawingAnchorEl.innerText = drawing.mode;
+
+    drawingEl.appendChild(drawingAnchorEl);
+    previousSessionsEl.appendChild(drawingEl);
+
+  });
+  console.log(drawings);
 }
 
 export function hideHome() {

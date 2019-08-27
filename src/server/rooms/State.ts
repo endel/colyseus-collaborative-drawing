@@ -13,7 +13,6 @@ export const DEFAULT_BRUSH = BRUSH.SKETCH;
 export class Path extends Schema {
   @type("string") brush;
   @type("number") color: number;
-  @type("number") userId: number;
   @type(["number"]) points = new ArraySchema<number>();
 }
 

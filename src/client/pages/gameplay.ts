@@ -2,7 +2,6 @@ import { client } from "../utils/networking";
 import { Room } from "colyseus.js";
 import { State, DEFAULT_BRUSH, BRUSH } from "../../server/rooms/State";
 import { showHome } from "./home";
-import { getRGB, toHex } from "../utils/color";
 import brushFunctions from "../brushes";
 
 let room: Room<State>;
@@ -33,10 +32,10 @@ gameplay.querySelector('.info a').addEventListener("click", (e) => {
   showHome();
 });
 
-const canvas = document.getElementById('drawing') as HTMLCanvasElement;
+const canvas = gameplay.querySelector('.drawing') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d');
 
-const prevCanvas = document.getElementById('drawing-preview') as HTMLCanvasElement;
+const prevCanvas = gameplay.querySelector('.drawing-preview') as HTMLCanvasElement;
 const prevCtx = prevCanvas.getContext('2d');
 
 export async function showGameplay(roomName: string) {
@@ -96,6 +95,10 @@ export async function showGameplay(roomName: string) {
 
 export function hideGameplay() {
   gameplay.classList.add('hidden');
+}
+
+export function clearCanvas(ctx) {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
 function checkRoom() {
@@ -176,9 +179,6 @@ function endPath() {
   clearCanvas(prevCtx);
 }
 
-function clearCanvas(ctx) {
-  ctx.clearRect(0, 0, prevCanvas.width, prevCanvas.height);
-}
 
 function millisecondsToStr(_seconds) {
   let temp = _seconds;

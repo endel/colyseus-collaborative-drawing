@@ -16,13 +16,25 @@ import path from "path";
 import basicAuth from "express-basic-auth";
 import socialRoutes from "@colyseus/social/express";
 import { monitor } from "@colyseus/monitor";
+import mongoose from 'mongoose';
 
 import { DrawingRoom } from "./rooms/DrawingRoom";
+import Drawing from "./db/Drawing";
 
 export const port = Number(process.env.PORT || 8080);
 export const endpoint = "localhost";
 
 export let STATIC_DIR: string;
+
+/**
+ * Connect to MongoDB
+ */
+mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/colyseus', {
+  autoIndex: true,
+  useCreateIndex: true,
+  useFindAndModify: true,
+  useNewUrlParser: true,
+});
 
 const app = express();
 const gameServer = new Server({ server: http.createServer(app) });
@@ -50,6 +62,20 @@ app.use("/", express.static(STATIC_DIR));
 
 // @colyseus/social routes
 app.use("/", socialRoutes);
+
+app.get('/drawings', async (req, res) => {
+  res.json(await Drawing.find({}, {
+    _id: 1,
+    mode: 1,
+    createdAt: 1,
+  }).sort({
+    createdAt: -1
+  }));
+});
+
+app.get('/drawings/:id', async (req, res) => {
+  res.json(await Drawing.findOne({ _id: req.param('id') }));
+});
 
 // add colyseus monitor
 const auth = basicAuth({ users: { 'admin': 'admin' }, challenge: true });

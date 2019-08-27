@@ -2,6 +2,7 @@ import { Room, Client } from "colyseus";
 import { State, Path, BRUSH, DEFAULT_BRUSH } from "./State";
 import { Player } from "./Player";
 import { generateName } from "../utils/name_generator";
+import Drawing from "../db/Drawing";
 
 export class DrawingRoom extends Room<State> {
   autoDispose = false;
@@ -69,8 +70,18 @@ export class DrawingRoom extends Room<State> {
     this.state.removePlayer(client.sessionId);
   }
 
-  onDispose() {
+  async onDispose() {
+    // TODO: fill `userIds` and `usersCount`
     console.log("Disposing room, let's persist its result!");
+
+    await Drawing.create({
+      paths: this.state.paths,
+      userIds: [],
+      usersCount: 0,
+      mode: this.roomName,
+      votes: 0,
+    });
+
   }
 
 }
