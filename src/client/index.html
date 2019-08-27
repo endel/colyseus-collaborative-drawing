@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Drawing Game</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
+
+  </head>
+  <body>
+    <div id="app">
+
+      <div id="home">
+        <h2>Picasso.Community</h2>
+        <input id="username" type="text" placeholder="Nickname" />
+
+        <h3>Drawing sessions</h3>
+        <ul>
+          <li><a href="#" data-room="2minutes">2 minutes</a></li>
+          <li><a href="#" data-room="5minutes">5 minutes</a></li>
+          <li><a href="#" data-room="1hour">1 hour</a></li>
+          <li><a href="#" data-room="1day">1 day</a></li>
+          <li><a href="#" data-room="1week">1 week</a></li>
+        </ul>
+      </div>
+
+      <div id="gameplay" class="hidden">
+
+        <section class="sidebar">
+          <div class="info">
+            <div class="mode"></div>
+            <div class="countdown"></div>
+            <a href="#">&laquo;Back</a>
+          </div>
+
+          <ul class="people"></ul>
+          <div class="chat">
+            <ul></ul>
+            <form onsubmit="">
+              <input type="text" placeholder="Chat" maxlength="120" />
+              <input type="submit" value="send" />
+            </form>
+          </div>
+        </section>
+
+        <section class="drawing-area">
+
+          <canvas id="drawing-preview" width="1024" height="768"></canvas>
+          <canvas id="drawing" width="1024" height="768"></canvas>
+        </section>
+
+      </div>
+
+    </div>
+  </body>
+</html>
