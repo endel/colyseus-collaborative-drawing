@@ -29,7 +29,7 @@ export let STATIC_DIR: string;
 /**
  * Connect to MongoDB
  */
-mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/colyseus', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/colyseus', {
   autoIndex: true,
   useCreateIndex: true,
   useFindAndModify: true,
