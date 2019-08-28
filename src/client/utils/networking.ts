@@ -1,3 +1,4 @@
 import { Client } from "colyseus.js";
 
-export const client = new Client(`ws://${location.hostname}:8080`);
+const port = (location.port && `:${location.port}`);
+export const client = new Client(`ws://${location.hostname}${port}`);
