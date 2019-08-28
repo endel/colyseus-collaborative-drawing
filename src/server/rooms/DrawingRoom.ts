@@ -17,7 +17,7 @@ export class DrawingRoom extends Room<State> {
 
   onJoin(client: Client, options: any) {
     const player = this.state.createPlayer(client.sessionId);
-    player.name = options.name || generateName();
+    player.name = options.nickname || generateName();
 
     this.lastChatMessages.forEach(chatMsg => this.send(client, ['chat', chatMsg]));
   }
@@ -39,18 +39,26 @@ export class DrawingRoom extends Room<State> {
 
     } else if (this.state.countdown > 0) {
       if (command === "s") {
-        // start path
+        //
+        // start new path.
+        //
+        // store it in the `player` instance temporarily,
+        // and assign it to the state.paths once it's complete!
+        //
         player.lastPath = new Path();
         player.lastPath.points.push(...data);
         player.lastPath.color = message[2];
         player.lastPath.brush = message[3] || DEFAULT_BRUSH;
 
       } else if (command === "p") {
-        // path point
+        // add point to the path
         player.lastPath.points.push(...data);
 
       } else if (command === "e") {
-        // end path
+        //
+        // end the path
+        // this is now going to synchronize with all clients
+        //
         this.state.paths.push(player.lastPath);
       }
     }
@@ -71,17 +79,15 @@ export class DrawingRoom extends Room<State> {
   }
 
   async onDispose() {
-    // TODO: fill `userIds` and `usersCount`
     console.log("Disposing room, let's persist its result!");
 
-    await Drawing.create({
-      paths: this.state.paths,
-      userIds: [],
-      usersCount: 0,
-      mode: this.roomName,
-      votes: 0,
-    });
-
+    if (this.state.paths.length > 0) {
+      await Drawing.create({
+        paths: this.state.paths,
+        mode: this.roomName,
+        votes: 0,
+      });
+    }
   }
 
 }

@@ -39,6 +39,11 @@ h1, h2, h3 {
   display: inline-block;
 }
 
+#home ul.previous-sessions li {
+  list-style: circle;
+  display: block;
+}
+
 #gameplay {
   display: flex;
 }
@@ -115,15 +120,6 @@ h1, h2, h3 {
   position: relative;
   width: 800px;
   height: 740px;
-}
-
-#gameplay .drawing-area .ad {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 728px;
-  height: 90px;
-  border: 1px solid;
 }
 
 .tools {

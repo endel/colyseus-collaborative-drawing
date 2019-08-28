@@ -1,5 +1,4 @@
 import { get } from "httpie";
-import { showGameplay } from "./gameplay";
 
 const home = document.getElementById('home');
 
@@ -9,8 +8,7 @@ Array.from(home.querySelectorAll('ul li a')).forEach((joinSessionLink) => {
 
     const target = e.target as HTMLElement;
     if (target.dataset.room) {
-      hideHome();
-      showGameplay(target.dataset.room);
+      location.hash = target.dataset.room;
     }
   });
 });
@@ -26,7 +24,7 @@ export async function showHome() {
     const drawingEl = document.createElement('li');
     const drawingAnchorEl = document.createElement('a');
     drawingAnchorEl.href = `#${drawing._id}`;
-    drawingAnchorEl.innerText = drawing.mode;
+    drawingAnchorEl.innerText = `${drawing.mode} (${drawing.createdAt})`;
 
     drawingEl.appendChild(drawingAnchorEl);
     previousSessionsEl.appendChild(drawingEl);

@@ -1,7 +1,6 @@
 import { client } from "../utils/networking";
 import { Room } from "colyseus.js";
 import { State, DEFAULT_BRUSH, BRUSH } from "../../server/rooms/State";
-import { showHome } from "./home";
 import brushFunctions from "../brushes";
 
 let room: Room<State>;
@@ -24,12 +23,10 @@ gameplay.querySelector('.info a').addEventListener("click", (e) => {
   e.preventDefault();
 
   if (room) {
-    console.log("LEAVE ROOM!");
     room.leave();
   }
 
-  hideGameplay();
-  showHome();
+  location.hash = "#";
 });
 
 const canvas = gameplay.querySelector('.drawing') as HTMLCanvasElement;
@@ -50,7 +47,9 @@ export async function showGameplay(roomName: string) {
   clearCanvas(prevCtx);
 
   gameplay.classList.add('loading');
-  room = await client.joinOrCreate(roomName);
+  room = await client.joinOrCreate(roomName, {
+    nickname: (document.getElementById('username') as HTMLInputElement).value
+  });
   room.onStateChange.once(() => gameplay.classList.remove('loading'));
 
   room.state.players.onAdd = (player, sessionId) => {

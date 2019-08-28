@@ -118,7 +118,6 @@ export default {
 
   /**
    * Rounded: https://codepen.io/kangax/pen/zofsp
-   */
   [BRUSH.ROUNDED]: (ctx: CanvasRenderingContext2D, color: number, points: number[], isPreview: boolean = false) => {
     ctx.strokeStyle = toHex(color);
 
@@ -150,4 +149,5 @@ export default {
     ctx.lineTo(currentX, currentY);
     ctx.stroke();
   },
+   */
 }
