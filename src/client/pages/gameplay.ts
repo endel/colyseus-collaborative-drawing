@@ -6,11 +6,13 @@ import brushFunctions from "../brushes";
 let room: Room<State>;
 
 const gameplay = document.getElementById('gameplay');
+const drawingArea = gameplay.querySelector('.drawing-area');
 const countdownEl = gameplay.querySelector('.countdown');
 
 const peopleEl = gameplay.querySelector('.people');
 const chatEl = gameplay.querySelector('.chat');
 const chatMessagesEl = chatEl.querySelector('ul');
+
 
 chatEl.querySelector('form').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -32,8 +34,10 @@ gameplay.querySelector('.info a').addEventListener("click", (e) => {
 const canvas = gameplay.querySelector('.drawing') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d');
 
-const prevCanvas = gameplay.querySelector('.drawing-preview') as HTMLCanvasElement;
-const prevCtx = prevCanvas.getContext('2d');
+var isDrawing, color = 0x000000, brush = DEFAULT_BRUSH, points = [ ];
+var previewCtx;
+
+const previewPerPlayer: {[id: string]: CanvasRenderingContext2D} = {};
 
 export async function showGameplay(roomName: string) {
   gameplay.classList.remove('hidden');
@@ -44,7 +48,6 @@ export async function showGameplay(roomName: string) {
   gameplay.querySelector('.mode').innerHTML = `${roomName} session`;
 
   clearCanvas(ctx);
-  clearCanvas(prevCtx);
 
   gameplay.classList.add('loading');
   room = await client.joinOrCreate(roomName, {
@@ -55,7 +58,44 @@ export async function showGameplay(roomName: string) {
   room.state.players.onAdd = (player, sessionId) => {
     const playerEl = document.createElement("li");
 
-    if (sessionId === room.sessionId) { playerEl.classList.add('you'); }
+    // create drawing preview canvas for this player
+    const previewCanvas = document.createElement("canvas");
+    previewCanvas.width = 800;
+    previewCanvas.height = 600;
+    previewCanvas.classList.add("drawing-preview");
+    drawingArea.appendChild(previewCanvas);
+    previewPerPlayer[sessionId] = previewCanvas.getContext('2d');
+
+    if (sessionId === room.sessionId) {
+      playerEl.classList.add('you');
+
+      previewCtx = previewCanvas.getContext('2d');
+
+      // add event listeners to current player's preview canvas
+      previewCanvas.addEventListener("mousedown", (e) => startPath(e.offsetX, e.offsetY));
+      previewCanvas.addEventListener("mousemove", (e) => movePath(e.offsetX, e.offsetY));
+      previewCanvas.addEventListener("mouseup", (e) => endPath());
+
+      previewCanvas.addEventListener("touchstart", (e) => {
+        var rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+        var bodyRect = document.body.getBoundingClientRect();
+        var x = e.touches[0].pageX - (rect.left - bodyRect.left);
+        var y = e.touches[0].pageY - (rect.top - bodyRect.top);
+        return startPath(x, y);
+      });
+      previewCanvas.addEventListener("touchmove", (e) => {
+        var rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+        var bodyRect = document.body.getBoundingClientRect();
+        var x = e.touches[0].pageX - (rect.left - bodyRect.left);
+        var y = e.touches[0].pageY - (rect.top - bodyRect.top);
+        movePath(x, y)
+      });
+      previewCanvas.addEventListener("touchend", (e) => endPath());
+
+    } else {
+      // prevent events on other people's canvases
+      previewCanvas.style.pointerEvents = "none";
+    }
 
     playerEl.innerText = player.name;
     playerEl.id = `p${sessionId}`;
@@ -63,8 +103,14 @@ export async function showGameplay(roomName: string) {
   }
 
   room.state.players.onRemove = (player, sessionId) => {
+    // remove player from the list
     const playerEl = peopleEl.querySelector(`#p${sessionId}`);
     peopleEl.removeChild(playerEl);
+
+    // remove preview canvas
+    const previewCanvas = previewPerPlayer[sessionId].canvas;
+    drawingArea.removeChild(previewCanvas);
+    delete previewPerPlayer[sessionId];
   }
 
   room.state.onChange = (changes) => {
@@ -77,8 +123,27 @@ export async function showGameplay(roomName: string) {
     });
   };
 
-  room.state.paths.onAdd = function(path, index) {
-    brushFunctions[path.brush](ctx, path.color, path.points, false);
+  room.state.paths.onAdd = (path, index) => {
+    const previewCanvas = previewPerPlayer[path.sessionId];
+
+    if (path.finished) {
+      brushFunctions[path.brush](ctx, path.color, path.points, false);
+
+    } else {
+      path.onChange = (changes) => {
+        changes.forEach(change => {
+          if (change.field === "finished") {
+            clearCanvas(previewCanvas);
+            brushFunctions[path.brush](ctx, path.color, path.points, false);
+
+          } else if (path.sessionId !== room.sessionId) { // skip preview from current player.
+            clearCanvas(previewCanvas);
+            brushFunctions[path.brush](previewCanvas, path.color, path.points, false);
+          }
+        })
+      }
+      path.triggerAll();
+    }
   }
 
   room.onMessage((message) => {
@@ -94,6 +159,10 @@ export async function showGameplay(roomName: string) {
 
 export function hideGameplay() {
   gameplay.classList.add('hidden');
+
+  for (let sessionId in previewPerPlayer) {
+    drawingArea.removeChild(previewPerPlayer[sessionId].canvas);
+  }
 }
 
 export function clearCanvas(ctx) {
@@ -106,28 +175,6 @@ function checkRoom() {
 
 ctx.lineWidth = 1;
 ctx.lineJoin = ctx.lineCap = 'round';
-
-var isDrawing, color = 0x000000, brush = DEFAULT_BRUSH, points = [ ];
-
-prevCanvas.addEventListener("mousedown", (e) => startPath(e.offsetX, e.offsetY));
-prevCanvas.addEventListener("mousemove", (e) => movePath(e.offsetX, e.offsetY));
-prevCanvas.addEventListener("mouseup", (e) => endPath());
-
-prevCanvas.addEventListener("touchstart", (e) => {
-  var rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
-  var bodyRect = document.body.getBoundingClientRect();
-  var x = e.touches[0].pageX - (rect.left - bodyRect.left);
-  var y = e.touches[0].pageY - (rect.top - bodyRect.top);
-  return startPath(x, y);
-});
-prevCanvas.addEventListener("touchmove", (e) => {
-  var rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
-  var bodyRect = document.body.getBoundingClientRect();
-  var x = e.touches[0].pageX - (rect.left - bodyRect.left);
-  var y = e.touches[0].pageY - (rect.top - bodyRect.top);
-  movePath(x, y)
-});
-prevCanvas.addEventListener("touchend", (e) => endPath());
 
 /**
  * Tools: colorpicker
@@ -146,12 +193,13 @@ Array.from(document.querySelectorAll('input[type=radio][name="brush"]')).forEach
 });
 
 function startPath(x, y) {
+  console.log("START PATH!");
   if (!checkRoom()) { return; }
 
   const point = [x, y];
   room.send(['s', point, color, brush]);
 
-  clearCanvas(prevCtx);
+  clearCanvas(previewCtx);
 
   isDrawing = true;
   points = [];
@@ -161,12 +209,13 @@ function startPath(x, y) {
 function movePath(x, y) {
   if (!checkRoom()) { return; }
   if (!isDrawing) { return; }
+  console.log("MOVE PATH!");
 
   const point = [x, y];
   room.send(['p', point]);
 
   points.push(...point);
-  brushFunctions[brush](prevCtx, color, points, true);
+  brushFunctions[brush](previewCtx, color, points, true);
 }
 
 function endPath() {
@@ -174,8 +223,6 @@ function endPath() {
 
   isDrawing = false;
   points.length = 0;
-
-  clearCanvas(prevCtx);
 }
 
 

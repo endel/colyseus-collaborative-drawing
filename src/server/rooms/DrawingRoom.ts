@@ -45,10 +45,14 @@ export class DrawingRoom extends Room<State> {
         // store it in the `player` instance temporarily,
         // and assign it to the state.paths once it's complete!
         //
-        player.lastPath = new Path();
-        player.lastPath.points.push(...data);
-        player.lastPath.color = message[2];
-        player.lastPath.brush = message[3] || DEFAULT_BRUSH;
+        const path = new Path();
+        path.sessionId = client.sessionId;
+        path.points.push(...data);
+        path.color = message[2];
+        path.brush = message[3] || DEFAULT_BRUSH;
+
+        this.state.paths.push(path);
+        player.lastPath = path;
 
       } else if (command === "p") {
         // add point to the path
@@ -59,7 +63,7 @@ export class DrawingRoom extends Room<State> {
         // end the path
         // this is now going to synchronize with all clients
         //
-        this.state.paths.push(player.lastPath);
+        player.lastPath.finished = true;
       }
     }
   }
