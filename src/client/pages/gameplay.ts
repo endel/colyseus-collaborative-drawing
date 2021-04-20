@@ -17,7 +17,7 @@ const chatMessagesEl = chatEl.querySelector('ul');
 chatEl.querySelector('form').addEventListener('submit', (e) => {
   e.preventDefault();
   const input = chatEl.querySelector('input[type=text]') as HTMLInputElement;
-  room.send(['chat', input.value]);
+  room.send('chat', input.value);
   input.value = "";
 });
 
@@ -130,30 +130,28 @@ export async function showGameplay(roomName: string) {
       brushFunctions[path.brush](ctx, path.color, path.points, false);
 
     } else {
-      path.onChange = (changes) => {
-        changes.forEach(change => {
-          if (change.field === "finished") {
-            clearCanvas(previewCanvas);
-            brushFunctions[path.brush](ctx, path.color, path.points, false);
-
-          } else if (path.sessionId !== room.sessionId) { // skip preview from current player.
-            clearCanvas(previewCanvas);
-            brushFunctions[path.brush](previewCanvas, path.color, path.points, false);
-          }
-        })
+      // skip preview from current player.
+      if (path.sessionId !== room.sessionId) {
+        path.points.onAdd = () => {
+          clearCanvas(previewCanvas);
+          brushFunctions[path.brush](previewCanvas, path.color, path.points, false);
+        }
       }
+
+      path.listen("finished", () => {
+        clearCanvas(previewCanvas);
+        brushFunctions[path.brush](ctx, path.color, path.points, false);
+      });
+
       path.triggerAll();
     }
   }
 
-  room.onMessage((message) => {
-    const [cmd, data] = message;
-    if (cmd === "chat") {
-      const message = document.createElement("li");
-      message.innerText = data;
-      chatMessagesEl.appendChild(message);
-      chatEl.scrollTop = chatEl.scrollHeight;
-    }
+  room.onMessage("chat", (text) => {
+    const message = document.createElement("li");
+    message.innerText = text;
+    chatMessagesEl.appendChild(message);
+    chatEl.scrollTop = chatEl.scrollHeight;
   });
 }
 
@@ -197,7 +195,7 @@ function startPath(x, y) {
   if (!checkRoom()) { return; }
 
   const point = [x, y];
-  room.send(['s', point, color, brush]);
+  room.send('s', [point, color, brush]);
 
   clearCanvas(previewCtx);
 
@@ -212,14 +210,14 @@ function movePath(x, y) {
   console.log("MOVE PATH!");
 
   const point = [x, y];
-  room.send(['p', point]);
+  room.send('p', point);
 
   points.push(...point);
   brushFunctions[brush](previewCtx, color, points, true);
 }
 
 function endPath() {
-  room.send(['e']);
+  room.send('e');
 
   isDrawing = false;
   points.length = 0;

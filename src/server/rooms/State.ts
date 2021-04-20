@@ -11,7 +11,7 @@ export enum BRUSH {
 export const DEFAULT_BRUSH = BRUSH.SKETCH;
 
 export class Path extends Schema {
-  @type("string") brush;
+  @type("string") brush: string;
   @type("string") sessionId: string;
   @type("number") color: number;
   @type(["number"]) points = new ArraySchema<number>();
@@ -19,16 +19,18 @@ export class Path extends Schema {
 }
 
 export class State extends Schema {
+  @type("number") expiration: number;
   @type("number") countdown: number;
   @type({ map: Player }) players = new MapSchema<Player>();
   @type([Path]) paths = new ArraySchema<Path>();
 
   createPlayer (sessionId: string) {
-    this.players[sessionId] = new Player();
-    return this.players[sessionId];
+    const player = new Player();
+    this.players.set(sessionId, player);
+    return player;
   }
 
   removePlayer (sessionId: string) {
-    delete this.players[sessionId];
+    this.players.delete(sessionId);
   }
 }

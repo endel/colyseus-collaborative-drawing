@@ -2,9 +2,10 @@
 
 html, body {
   overflow: hidden;
-  font-family: 'Varela Round', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Indie Flower', cursive;
   font-size: 22px;
-  background: #f0f0f0;
+  background: url(./background.jpeg) center center;
+  background-size: cover;
 }
 
 #app {
@@ -13,18 +14,38 @@ html, body {
 }
 
 input {
-  padding: 6px;
+  padding: 0.5em;
   border-radius: 5px;
   font-size: inherit;
+  font-family: inherit;
+  background: #dedede;
+  border: 0;
+  outline: none;
 }
 
 ul {
   list-style: none;
 }
 
+ul.buttons a {
+  background: rgb(235, 117, 115);
+  color: #fff;
+  text-decoration: none;
+  padding: 0.5em;
+  border-radius: 5px;
+}
+
+ul.buttons a:hover {
+  background: rgb(214, 107, 106);
+}
+
 h1, h2, h3 {
   margin-top: 1em;
-  margin-bottom: 0.2em;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  margin-top: 3em;
 }
 
 .hidden {
@@ -64,14 +85,14 @@ h1, h2, h3 {
 #gameplay section.sidebar .info {
   /* border-radius: 4px; */
   text-align: center;
-  background: rgba(255, 0, 144);
+  background: rgb(235, 117, 115);
   color: #fff;
   padding: 8px;
 }
 
 #gameplay section.sidebar .info .mode {
   background: #fff;
-  color: rgba(255, 0, 144);
+  color: rgb(235, 117, 115);
   border-radius: 4px;
   font-size: 0.9em;
   padding: 4px 8px;
@@ -84,7 +105,7 @@ h1, h2, h3 {
   left: 0;
   top: 0;
   background: #fff;
-  color: rgba(255, 0, 144);
+  color: rgb(235, 117, 115);
   border-radius: 4px;
   font-size: 0.9em;
   padding: 4px 8px;

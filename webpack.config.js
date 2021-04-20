@@ -14,7 +14,7 @@ module.exports = function (options) {
       rules: [
         { test: /\.css$/i, use: ['style-loader', 'css-loader'], },
         { test: /\.tsx?$/, use: 'ts-loader?configFile=tsconfig-client.json', exclude: /node_modules/ },
-        { test: /\.(png|woff|woff2|eot|ttf|svg)$/, use: 'file-loader?limit=1024&name=[path][name].[ext]' },
+        { test: /\.(png|jpe?g|woff|woff2|eot|ttf|svg)$/, use: 'file-loader?limit=1024&name=[path][name].[ext]' },
       ]
     },
     plugins: [
