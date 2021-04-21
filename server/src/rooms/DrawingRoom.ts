@@ -7,13 +7,13 @@ export class DrawingRoom extends Room<State> {
   autoDispose = false;
   lastChatMessages: string[] = [];
 
-  onCreate(options) {
+  onCreate(options: any) {
     this.setState(new State());
     this.state.expiration = options.expiration;
     this.state.countdown = options.expiration;
 
     this.onMessage("chat", (client: Client, message: any) => {
-      const player: Player = this.state.players[client.sessionId];
+      const player: Player = this.state.players.get(client.sessionId);
       const chatMsg = `${player.name}: ${message}`;
 
       this.broadcast('chat', chatMsg);
@@ -32,7 +32,7 @@ export class DrawingRoom extends Room<State> {
       // store it in the `player` instance temporarily,
       // and assign it to the state.paths once it's complete!
       //
-      const player: Player = this.state.players[client.sessionId];
+      const player: Player = this.state.players.get(client.sessionId);
 
       const path = new Path();
       path.sessionId = client.sessionId;
@@ -49,7 +49,7 @@ export class DrawingRoom extends Room<State> {
       //
       // add point to the path
       //
-      const player: Player = this.state.players[client.sessionId];
+      const player: Player = this.state.players.get(client.sessionId);
       player.lastPath.points.push(...message);
     });
 
@@ -58,7 +58,7 @@ export class DrawingRoom extends Room<State> {
       // end the path
       // this is now going to synchronize with all clients
       //
-      const player: Player = this.state.players[client.sessionId];
+      const player: Player = this.state.players.get(client.sessionId);
       player.lastPath.finished = true;
     });
 

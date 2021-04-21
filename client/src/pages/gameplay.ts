@@ -1,6 +1,6 @@
 import { client } from "../utils/networking";
 import { Room } from "colyseus.js";
-import { State, DEFAULT_BRUSH, BRUSH } from "../../server/rooms/State";
+import { State, DEFAULT_BRUSH, BRUSH } from "../../../server/src/rooms/State";
 import brushFunctions from "../brushes";
 
 let room: Room<State>;

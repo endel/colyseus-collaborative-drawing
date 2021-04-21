@@ -1,4 +1,4 @@
-import { BRUSH } from "../../server/rooms/State";
+import { BRUSH } from "../../../server/src/rooms/State";
 import { getRGB, toHex } from "../utils/color";
 
 function midPointBtw(p1x, p1y, p2x, p2y) {
